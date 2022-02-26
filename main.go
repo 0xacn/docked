@@ -1,38 +1,30 @@
 package main
 
 import (
-  "os"
+  "context"
+  "encoding/json"
   "fmt"
-  "github.com/fatih/color"
-)
-var (
-	version = "dev"
-	helpCmd = `whack - a better process killer
-						
-	Usage
-		$ whack <pid> <name> <port>
-	Options
-		--force								Force kill a process
-		--verbose							Show process arguments
-	Examples
-	$ whack 1445
-	$ whack discord
-	$ whack :3000
-	To terminate a specific port, add a colon. e.g: :3000.`
+  "net/http"
+  "net/url"
+  "os"
+  "os/exec"
+  "strings"
+  "regexp"
+
+  "docker.io/go-docker"
+  "docker.io/go-docker/api/types/registry"
+  "dockerio/go-docker/api/types"
 )
 
-func main() {
-  if len(os.Args) > 4 {
-    handleErrStr("Too many arguments >3")
-    fmt.Println(helpCmd)
-    return
-  }
-}
+var dockerClient *docker.Client
+var shellCommands commands.Commands = commands.New()
 
-func handleErr(err error) {
-  handleErrStr(err.Error())
-}
-
-func handleErrStr(str string) {
-  _, _ = fmt.Fprintln(os.Stderr, color.RedString("error: ")+str)
+// docker results (api req)
+type DockerHubResulttruct {
+  ResultCount *int `json:"num_results,omitempty"`
+  PageCount *int `json:"num_pages,omitempty"`
+  ItemCountPerPage *int `json:"page_size,omitempty"`
+  Query *string `json:"query,omitempty"`
+  CurrentPage *int `json:"page,omitempty"`
+  Items []registry.SearchResult `json:"results,omitempty"`
 }
